@@ -1,7 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const https = require('https');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import https from 'https';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = 3001;
@@ -91,28 +93,58 @@ app.get('/api/restaurants', async (req, res) => {
       
       console.log(`Searching for: ${keyword}...`);
       const data = await fetchData(url);
-      
+
       if (data.status === 'OK' && data.results) {
-        data.results.forEach(place => {
-          // Use place_id as key to avoid duplicates
-          if (!allRestaurants.has(place.place_id)) {
-            allRestaurants.set(place.place_id, {
-              name: place.name,
-              address: place.vicinity || place.formatted_address,
-              place_id: place.place_id,
-              rating: place.rating,
-              user_ratings_total: place.user_ratings_total,
-              price_level: place.price_level,
-              types: place.types,
-              opening_hours: place.opening_hours,
-              geometry: place.geometry,
-              searchKeyword: keyword // Track which keyword found this restaurant
-            });
+        // Get place_ids from search results
+        const placeIds = data.results.map(place => place.place_id);
+
+        // Fetch detailed info for each place
+        for (const placeId of placeIds) {
+          if (!allRestaurants.has(placeId)) {
+            try {
+              // Fetch place details
+              const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,photos,website,opening_hours,rating,user_ratings_total,geometry,price_level,types&key=${apiKey}`;
+              const detailsData = await fetchData(detailsUrl);
+
+              if (detailsData.status === 'OK' && detailsData.result) {
+                const place = detailsData.result;
+
+                // Get photo URL if available
+                let photoUrl = null;
+                if (place.photos && place.photos.length > 0) {
+                  const photoReference = place.photos[0].photo_reference;
+                  photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${apiKey}`;
+                }
+
+                allRestaurants.set(placeId, {
+                  name: place.name,
+                  address: place.formatted_address,
+                  place_id: placeId,
+                  rating: place.rating,
+                  user_ratings_total: place.user_ratings_total,
+                  price_level: place.price_level,
+                  types: place.types,
+                  opening_hours: place.opening_hours ? {
+                    open_now: place.opening_hours.open_now
+                  } : null,
+                  geometry: place.geometry,
+                  searchKeyword: keyword,
+                  photo: photoUrl,
+                  website: place.website || null,
+                  weekday_text: place.opening_hours?.weekday_text || null
+                });
+              }
+
+              // Small delay to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (error) {
+              console.error(`Error fetching details for ${placeId}:`, error.message);
+            }
           }
-        });
+        }
       }
-      
-      // Small delay to avoid rate limiting
+
+      // Small delay between keyword searches
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 

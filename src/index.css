@@ -1,13 +1,169 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  background-color: #F7F7F7;
+  overflow-x: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #F7F7F7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+#root {
+  background-color: #F7F7F7;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Floating bubbles animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  25% {
+    transform: translateY(-40px) translateX(20px) scale(1.1);
+  }
+  50% {
+    transform: translateY(-80px) translateX(-25px) scale(0.9);
+  }
+  75% {
+    transform: translateY(-40px) translateX(15px) scale(1.05);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  25% {
+    transform: translateY(40px) translateX(-20px) scale(1.1);
+  }
+  50% {
+    transform: translateY(80px) translateX(25px) scale(0.9);
+  }
+  75% {
+    transform: translateY(40px) translateX(-15px) scale(1.05);
+  }
+}
+
+.floating-bubble {
+  position: absolute;
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+  opacity: 0.15;
+}
+
+.floating-bubble:nth-child(1) {
+  width: 80px;
+  height: 80px;
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+  animation-duration: 10s;
+}
+
+.floating-bubble:nth-child(2) {
+  width: 150px;
+  height: 150px;
+  top: 55%;
+  left: 80%;
+  animation-delay: 2s;
+  animation-duration: 14s;
+  animation-name: floatReverse;
+}
+
+.floating-bubble:nth-child(3) {
+  width: 120px;
+  height: 120px;
+  top: 15%;
+  right: 8%;
+  animation-delay: 4s;
+  animation-duration: 12s;
+}
+
+.floating-bubble:nth-child(4) {
+  width: 60px;
+  height: 60px;
+  bottom: 25%;
+  left: 12%;
+  animation-delay: 1s;
+  animation-duration: 9s;
+  animation-name: floatReverse;
+}
+
+.floating-bubble:nth-child(5) {
+  width: 180px;
+  height: 180px;
+  top: 65%;
+  right: 18%;
+  animation-delay: 3s;
+  animation-duration: 15s;
+}
+
+.floating-bubble:nth-child(6) {
+  width: 100px;
+  height: 100px;
+  top: 35%;
+  left: 25%;
+  animation-delay: 5s;
+  animation-duration: 11s;
+  animation-name: floatReverse;
+}
+
+.floating-bubble:nth-child(7) {
+  width: 70px;
+  height: 70px;
+  top: 75%;
+  left: 50%;
+  animation-delay: 2.5s;
+  animation-duration: 13s;
+}
+
+.floating-bubble:nth-child(8) {
+  width: 130px;
+  height: 130px;
+  top: 5%;
+  right: 30%;
+  animation-delay: 6s;
+  animation-duration: 16s;
+  animation-name: floatReverse;
+}
+
+.floating-bubble:nth-child(9) {
+  width: 90px;
+  height: 90px;
+  bottom: 10%;
+  right: 5%;
+  animation-delay: 1.5s;
+  animation-duration: 10s;
+}
+
+.floating-bubble:nth-child(10) {
+  width: 110px;
+  height: 110px;
+  top: 45%;
+  left: 60%;
+  animation-delay: 4.5s;
+  animation-duration: 14s;
+  animation-name: floatReverse;
 }
