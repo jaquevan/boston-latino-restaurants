@@ -4,6 +4,7 @@ import { MdRestaurant } from 'react-icons/md';
 import { GiTacos } from 'react-icons/gi';
 import { gsap } from 'gsap';
 import RestaurantCard from './components/RestaurantCard';
+import SkeletonCard from './components/SkeletonCard';
 
 // Lazy load the map component
 const RestaurantMap = lazy(() => import('./components/RestaurantMap'));
@@ -15,21 +16,26 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [isMapExpanded, setIsMapExpanded] = useState(true);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationPermission, setLocationPermission] = useState('prompt');
+  const [isSortSticky, setIsSortSticky] = useState(false);
 
   // Refs for GSAP animations
   const heroIconRef = useRef(null);
   const heroTitleRef = useRef(null);
   const heroSubtitleRef = useRef(null);
   const heroStatsRef = useRef([]);
+  const sortBarRef = useRef(null);
 
   const categories = ['all', 'Mexican', 'Colombian', 'Puerto Rican', 'Dominican', 'Peruvian', 'Cuban', 'Venezuelan', 'Salvadoran', 'Brazilian', 'Argentinian', 'Spanish', 'Other'];
 
-  // Boston University coordinates
+  // Default location: Boston University
   const BU_LAT = 42.3505;
   const BU_LON = -71.1054;
 
   useEffect(() => {
     fetchRestaurants();
+    requestUserLocation();
   }, []);
 
   // GSAP Hero Animations
@@ -59,6 +65,45 @@ function App() {
       { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.15 },
       '-=0.4'
     );
+  }, []);
+
+  // Request user's geolocation
+  const requestUserLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+          setLocationPermission('granted');
+          console.log('✅ User location obtained:', position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.log('❌ Geolocation error:', error.message);
+          setLocationPermission('denied');
+          // Fallback to BU coordinates
+          setUserLocation({ lat: BU_LAT, lon: BU_LON });
+        }
+      );
+    } else {
+      console.log('❌ Geolocation not supported');
+      setLocationPermission('denied');
+      setUserLocation({ lat: BU_LAT, lon: BU_LON });
+    }
+  };
+
+  // Sticky sort bar on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sortBarRef.current) {
+        const sortBarTop = sortBarRef.current.getBoundingClientRect().top;
+        setIsSortSticky(sortBarTop <= 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const fetchRestaurants = async () => {
@@ -140,7 +185,10 @@ function App() {
     const category = categorizeRestaurant(r);
     let distance = null;
     if (r.geometry && r.geometry.location) {
-      distance = calculateDistance(BU_LAT, BU_LON, r.geometry.location.lat, r.geometry.location.lng);
+      // Use user's location if available, otherwise use BU coordinates
+      const userLat = userLocation?.lat || BU_LAT;
+      const userLon = userLocation?.lon || BU_LON;
+      distance = calculateDistance(userLat, userLon, r.geometry.location.lat, r.geometry.location.lng);
     }
     return { ...r, category, distance };
   });
@@ -176,26 +224,22 @@ function App() {
 
   return (
     <div className="min-h-screen bg-coco" data-theme="latino">
-      {/* Hero Section - Rebranded */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-coral via-coral to-plantain h-screen max-h-[85vh] flex items-center">
-        {/* Floating bubbles with varied colors */}
-        <div className="floating-bubble bg-cariblue"></div>
-        <div className="floating-bubble bg-plantain"></div>
-        <div className="floating-bubble bg-oceanmint"></div>
-        <div className="floating-bubble bg-white"></div>
-        <div className="floating-bubble bg-cariblue"></div>
-        <div className="floating-bubble bg-coral"></div>
-        <div className="floating-bubble bg-plantain"></div>
-        <div className="floating-bubble bg-oceanmint"></div>
-        <div className="floating-bubble bg-white"></div>
-        <div className="floating-bubble bg-cariblue"></div>
+      {/* Hero Section - Enhanced with vibrant colors */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-coral via-[#FF6B9D] via-[#FFA07A] to-plantain h-screen max-h-[85vh] flex items-center">
+        {/* Colorful floating bubbles with less opacity */}
+        <div className="floating-bubble bubble-blue"></div>
+        <div className="floating-bubble bubble-yellow"></div>
+        <div className="floating-bubble bubble-green"></div>
+        <div className="floating-bubble bubble-cyan"></div>
+        <div className="floating-bubble bubble-lime"></div>
+        <div className="floating-bubble bubble-teal"></div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             {/* Icon with animation ref */}
             <div ref={heroIconRef} className="mb-6">
-              <div className="inline-block p-4 bg-white/20 backdrop-blur-md rounded-full shadow-2xl">
-                <GiTacos className="text-7xl md:text-8xl text-white" aria-hidden="true" />
+              <div className="inline-block p-4 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-md rounded-full shadow-2xl border-2 border-white/30">
+                <GiTacos className="text-7xl md:text-8xl text-white drop-shadow-lg" aria-hidden="true" />
               </div>
             </div>
 
@@ -208,49 +252,49 @@ function App() {
               Sabor Latino Boston
             </h1>
 
-            {/* Subtitle with animation ref */}
+            {/* Enhanced Subtitle with animation ref */}
             <p
               ref={heroSubtitleRef}
-              className="text-xl md:text-3xl text-white mb-12 max-w-4xl mx-auto font-light leading-relaxed"
-              style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.2)' }}
+              className="text-2xl md:text-4xl text-white mb-3 max-w-4xl mx-auto font-bold leading-relaxed"
+              style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.3)' }}
             >
-              Discover the heart of Latino cuisine in Boston
+              Local Latino Restaurants
             </p>
 
-            {/* Stats cards with animation refs */}
+            {/* Colorful Stats cards with animation refs */}
             <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto" role="list">
               <div
                 ref={(el) => (heroStatsRef.current[0] = el)}
-                className="group bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:bg-white/20 transition-all duration-300 min-w-[160px] border-2 border-white/20"
+                className="group bg-gradient-to-br from-[#4ECDC4]/20 to-[#44A08D]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#4ECDC4]"
                 role="listitem"
               >
-                <MdRestaurant className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                <MdRestaurant className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
                 {loading ? (
                   <div className="text-4xl font-black text-white mb-1 animate-pulse">...</div>
                 ) : (
-                  <div className="text-4xl font-black text-white mb-1">{restaurants.length}+</div>
+                  <div className="text-4xl font-black text-white mb-1 drop-shadow-md">{restaurants.length}+</div>
                 )}
-                <div className="text-base text-white/90 font-medium">Restaurants</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Restaurants</div>
               </div>
 
               <div
                 ref={(el) => (heroStatsRef.current[1] = el)}
-                className="group bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:bg-white/20 transition-all duration-300 min-w-[160px] border-2 border-white/20"
+                className="group bg-gradient-to-br from-[#FFD93D]/20 to-[#F9CA24]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#FFD93D]"
                 role="listitem"
               >
-                <FaMapMarkerAlt className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform" aria-hidden="true" />
-                <div className="text-4xl font-black text-white mb-1">5mi</div>
-                <div className="text-base text-white/90 font-medium">Radius</div>
+                <FaMapMarkerAlt className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
+                <div className="text-4xl font-black text-white mb-1 drop-shadow-md">5mi</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Radius</div>
               </div>
 
               <div
                 ref={(el) => (heroStatsRef.current[2] = el)}
-                className="group bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:bg-white/20 transition-all duration-300 min-w-[160px] border-2 border-white/20"
+                className="group bg-gradient-to-br from-[#A8E6CF]/20 to-[#81C784]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#A8E6CF]"
                 role="listitem"
               >
-                <FaUtensils className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform" aria-hidden="true" />
-                <div className="text-4xl font-black text-white mb-1">13</div>
-                <div className="text-base text-white/90 font-medium">Cuisines</div>
+                <FaUtensils className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
+                <div className="text-4xl font-black text-white mb-1 drop-shadow-md">13</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Cuisines</div>
               </div>
             </div>
           </div>
@@ -295,53 +339,6 @@ function App() {
 
             {/* Map Section - Right Side */}
             <div className="lg:col-span-2">
-              {/* Sort Controls */}
-              <div className="bg-white rounded-2xl p-4 mb-4" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-sm font-bold text-cafe">Sort by:</span>
-                  <button
-                    onClick={() => setSortBy('default')}
-                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
-                      sortBy === 'default'
-                        ? 'bg-cariblue text-white shadow-md'
-                        : 'bg-coco text-cafe hover:bg-gray-100'
-                    }`}
-                  >
-                    Default
-                  </button>
-                  <button
-                    onClick={() => setSortBy('distance')}
-                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
-                      sortBy === 'distance'
-                        ? 'bg-cariblue text-white shadow-md'
-                        : 'bg-coco text-cafe hover:bg-gray-100'
-                    }`}
-                  >
-                    <FaMapMarkerAlt /> Distance
-                  </button>
-                  <button
-                    onClick={() => setSortBy('rating')}
-                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
-                      sortBy === 'rating'
-                        ? 'bg-cariblue text-white shadow-md'
-                        : 'bg-coco text-cafe hover:bg-gray-100'
-                    }`}
-                  >
-                    <FaStar /> Rating
-                  </button>
-                  <button
-                    onClick={() => setSortBy('alphabetical')}
-                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
-                      sortBy === 'alphabetical'
-                        ? 'bg-cariblue text-white shadow-md'
-                        : 'bg-coco text-cafe hover:bg-gray-100'
-                    }`}
-                  >
-                    A-Z
-                  </button>
-                </div>
-              </div>
-
               {/* Map Container */}
               <div>
                 <button
@@ -383,11 +380,85 @@ function App() {
           </div>
         )}
 
-        {loading && (
-          <div className="bg-white rounded-2xl p-12 text-center" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cariblue border-t-transparent mb-4"></div>
-            <p className="text-lg text-cafe font-medium">Loading restaurants...</p>
+        {/* Sticky Sort Controls - Below Map */}
+        {!loading && !error && restaurantsWithDetails.length > 0 && (
+          <div
+            ref={sortBarRef}
+            className={`transition-all duration-300 ${
+              isSortSticky
+                ? 'fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg'
+                : 'bg-white rounded-2xl mb-6'
+            }`}
+            style={!isSortSticky ? { boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' } : {}}
+          >
+            <div className={`${isSortSticky ? 'max-w-7xl mx-auto px-4 py-3' : 'p-4'}`}>
+              <div className="flex items-center gap-3 flex-wrap justify-center">
+                <span className="text-sm font-bold text-cafe">Sort by:</span>
+                <button
+                  onClick={() => setSortBy('default')}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                    sortBy === 'default'
+                      ? 'bg-cariblue text-white shadow-md'
+                      : 'bg-coco text-cafe hover:bg-gray-100'
+                  }`}
+                >
+                  Default
+                </button>
+                <button
+                  onClick={() => setSortBy('distance')}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
+                    sortBy === 'distance'
+                      ? 'bg-cariblue text-white shadow-md'
+                      : 'bg-coco text-cafe hover:bg-gray-100'
+                  }`}
+                >
+                  <FaMapMarkerAlt /> Distance
+                </button>
+                <button
+                  onClick={() => setSortBy('rating')}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
+                    sortBy === 'rating'
+                      ? 'bg-cariblue text-white shadow-md'
+                      : 'bg-coco text-cafe hover:bg-gray-100'
+                  }`}
+                >
+                  <FaStar /> Rating
+                </button>
+                <button
+                  onClick={() => setSortBy('alphabetical')}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                    sortBy === 'alphabetical'
+                      ? 'bg-cariblue text-white shadow-md'
+                      : 'bg-coco text-cafe hover:bg-gray-100'
+                  }`}
+                >
+                  A-Z
+                </button>
+                {locationPermission === 'granted' && (
+                  <span className="text-xs text-green-600 font-medium px-3 py-1.5 bg-green-50 rounded-full flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-xs" />
+                    Using your location
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
+        )}
+
+        {loading && (
+          <>
+            <div className="bg-white rounded-2xl p-4 mb-6 text-center" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <div className="flex items-center justify-center gap-3">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-4 border-cariblue border-t-transparent"></div>
+                <p className="text-lg text-cafe font-medium">Loading restaurants...</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(12)].map((_, index) => (
+                <SkeletonCard key={index} index={index} />
+              ))}
+            </div>
+          </>
         )}
 
         {error && (

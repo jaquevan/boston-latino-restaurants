@@ -51,135 +51,198 @@ code {
     monospace;
 }
 
-/* Floating bubbles animation */
+/* Skeleton loading shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-pulse {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Enhanced Floating bubbles animation */
 @keyframes float {
   0%, 100% {
-    transform: translateY(0) translateX(0) scale(1);
+    transform: translateY(0) translateX(0) scale(1) rotate(0deg);
   }
   25% {
-    transform: translateY(-40px) translateX(20px) scale(1.1);
+    transform: translateY(-60px) translateX(30px) scale(1.15) rotate(90deg);
   }
   50% {
-    transform: translateY(-80px) translateX(-25px) scale(0.9);
+    transform: translateY(-100px) translateX(-35px) scale(0.85) rotate(180deg);
   }
   75% {
-    transform: translateY(-40px) translateX(15px) scale(1.05);
+    transform: translateY(-50px) translateX(20px) scale(1.08) rotate(270deg);
   }
 }
 
 @keyframes floatReverse {
   0%, 100% {
-    transform: translateY(0) translateX(0) scale(1);
+    transform: translateY(0) translateX(0) scale(1) rotate(360deg);
   }
   25% {
-    transform: translateY(40px) translateX(-20px) scale(1.1);
+    transform: translateY(60px) translateX(-30px) scale(1.15) rotate(270deg);
   }
   50% {
-    transform: translateY(80px) translateX(25px) scale(0.9);
+    transform: translateY(100px) translateX(35px) scale(0.85) rotate(180deg);
   }
   75% {
-    transform: translateY(40px) translateX(-15px) scale(1.05);
+    transform: translateY(50px) translateX(-20px) scale(1.08) rotate(90deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.06;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.10;
   }
 }
 
 .floating-bubble {
   position: absolute;
   border-radius: 50%;
-  animation: float 8s ease-in-out infinite;
-  opacity: 0.15;
+  animation: float 12s ease-in-out infinite;
+  opacity: 0.3;
+  filter: blur(2px);
 }
 
+/* Colorful bubble variants */
+.bubble-blue {
+  background: linear-gradient(135deg, #6DD5FA, #2980B9);
+}
+
+.bubble-yellow {
+  background: linear-gradient(135deg, #FFD93D, #F9CA24);
+}
+
+.bubble-green {
+  background: linear-gradient(135deg, #A8E6CF, #81C784);
+}
+
+
+.bubble-cyan {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+}
+
+
+.bubble-lime {
+  background: linear-gradient(135deg, #D4FC79, #96E6A1);
+}
+
+
+.bubble-teal {
+  background: linear-gradient(135deg, #00D2FF, #3A7BD5);
+}
+
+
 .floating-bubble:nth-child(1) {
-  width: 80px;
-  height: 80px;
-  top: 10%;
+  width: 120px;
+  height: 120px;
+  top: 8%;
   left: 5%;
   animation-delay: 0s;
-  animation-duration: 10s;
+  animation-duration: 14s;
 }
 
 .floating-bubble:nth-child(2) {
-  width: 150px;
-  height: 150px;
-  top: 55%;
-  left: 80%;
+  width: 180px;
+  height: 180px;
+  top: 50%;
+  left: 78%;
   animation-delay: 2s;
-  animation-duration: 14s;
+  animation-duration: 18s;
   animation-name: floatReverse;
 }
 
 .floating-bubble:nth-child(3) {
-  width: 120px;
-  height: 120px;
-  top: 15%;
-  right: 8%;
+  width: 140px;
+  height: 140px;
+  top: 12%;
+  right: 6%;
   animation-delay: 4s;
-  animation-duration: 12s;
+  animation-duration: 16s;
 }
 
 .floating-bubble:nth-child(4) {
-  width: 60px;
-  height: 60px;
-  bottom: 25%;
-  left: 12%;
+  width: 90px;
+  height: 90px;
+  bottom: 20%;
+  left: 10%;
   animation-delay: 1s;
-  animation-duration: 9s;
+  animation-duration: 13s;
   animation-name: floatReverse;
 }
 
 .floating-bubble:nth-child(5) {
-  width: 180px;
-  height: 180px;
-  top: 65%;
-  right: 18%;
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 15%;
   animation-delay: 3s;
-  animation-duration: 15s;
+  animation-duration: 20s;
 }
 
 .floating-bubble:nth-child(6) {
-  width: 100px;
-  height: 100px;
-  top: 35%;
-  left: 25%;
+  width: 130px;
+  height: 130px;
+  top: 30%;
+  left: 22%;
   animation-delay: 5s;
-  animation-duration: 11s;
+  animation-duration: 15s;
   animation-name: floatReverse;
 }
 
 .floating-bubble:nth-child(7) {
-  width: 70px;
-  height: 70px;
-  top: 75%;
-  left: 50%;
+  width: 100px;
+  height: 100px;
+  top: 70%;
+  left: 48%;
   animation-delay: 2.5s;
-  animation-duration: 13s;
+  animation-duration: 17s;
 }
 
 .floating-bubble:nth-child(8) {
-  width: 130px;
-  height: 130px;
+  width: 160px;
+  height: 160px;
   top: 5%;
-  right: 30%;
+  right: 28%;
   animation-delay: 6s;
-  animation-duration: 16s;
+  animation-duration: 19s;
   animation-name: floatReverse;
 }
 
 .floating-bubble:nth-child(9) {
-  width: 90px;
-  height: 90px;
-  bottom: 10%;
-  right: 5%;
+  width: 110px;
+  height: 110px;
+  bottom: 8%;
+  right: 4%;
   animation-delay: 1.5s;
-  animation-duration: 10s;
+  animation-duration: 14s;
 }
 
 .floating-bubble:nth-child(10) {
-  width: 110px;
-  height: 110px;
-  top: 45%;
-  left: 60%;
+  width: 150px;
+  height: 150px;
+  top: 40%;
+  left: 58%;
   animation-delay: 4.5s;
-  animation-duration: 14s;
+  animation-duration: 18s;
   animation-name: floatReverse;
 }

@@ -1,155 +1,70 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { FaMapMarkerAlt, FaStar, FaDollarSign, FaExternalLinkAlt, FaClock, FaGlobe } from 'react-icons/fa';
 import { MdRestaurant } from 'react-icons/md';
 
 const RestaurantCard = ({ restaurant, index }) => {
   const cardRef = useRef(null);
-  const imageRef = useRef(null);
-  const badgeRef = useRef(null);
-  const titleRef = useRef(null);
-  const buttonRefs = useRef([]);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    // Initial card fade in with rotation
-    gsap.fromTo(
-      cardRef.current,
-      { opacity: 0, y: 50, rotationX: -15 },
+    // Create intersection observer to only animate when card is visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            // Simple fade-in animation only
+            gsap.fromTo(
+              cardRef.current,
+              { opacity: 0, y: 30 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: 'power2.out'
+              }
+            );
+            setHasAnimated(true);
+            // Unobserve after animating once
+            observer.unobserve(entry.target);
+          }
+        });
+      },
       {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.6,
-        delay: index * 0.08,
-        ease: 'power3.out'
+        threshold: 0.1,
+        rootMargin: '50px'
       }
     );
 
-    // Animate the badge with a bounce
-    if (badgeRef.current) {
-      gsap.fromTo(
-        badgeRef.current,
-        { scale: 0, rotation: -180 },
-        {
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          delay: index * 0.08 + 0.3,
-          ease: 'back.out(1.7)'
-        }
-      );
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
     }
 
-    // Animate title with slide
-    if (titleRef.current) {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, x: -20 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          delay: index * 0.08 + 0.2,
-          ease: 'power2.out'
-        }
-      );
-    }
-
-    // Stagger button animations
-    buttonRefs.current.forEach((btn, i) => {
-      if (btn) {
-        gsap.fromTo(
-          btn,
-          { opacity: 0, y: 10 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            delay: index * 0.08 + 0.4 + (i * 0.1),
-            ease: 'power2.out'
-          }
-        );
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
       }
-    });
-  }, [index]);
-
-  const handleMouseEnter = () => {
-    gsap.to(cardRef.current, {
-      y: -12,
-      scale: 1.02,
-      boxShadow: '0 20px 40px rgba(46, 134, 171, 0.2)',
-      duration: 0.4,
-      ease: 'power2.out'
-    });
-
-    if (imageRef.current) {
-      gsap.to(imageRef.current, {
-        scale: 1.15,
-        rotation: 2,
-        duration: 0.6,
-        ease: 'power2.out'
-      });
-    }
-
-    if (badgeRef.current) {
-      gsap.to(badgeRef.current, {
-        scale: 1.1,
-        rotation: 5,
-        duration: 0.3,
-        ease: 'back.out(1.7)'
-      });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    gsap.to(cardRef.current, {
-      y: 0,
-      scale: 1,
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
-      duration: 0.4,
-      ease: 'power2.out'
-    });
-
-    if (imageRef.current) {
-      gsap.to(imageRef.current, {
-        scale: 1,
-        rotation: 0,
-        duration: 0.6,
-        ease: 'power2.out'
-      });
-    }
-
-    if (badgeRef.current) {
-      gsap.to(badgeRef.current, {
-        scale: 1,
-        rotation: 0,
-        duration: 0.3,
-        ease: 'back.out(1.7)'
-      });
-    }
-  };
+    };
+  }, [hasAnimated]);
 
   return (
     <article
       ref={cardRef}
-      className="bg-white rounded-3xl overflow-hidden group"
+      className="bg-white rounded-3xl overflow-hidden group transition-all duration-300 hover:-translate-y-3 hover:scale-[1.02] opacity-0"
       style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)' }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       aria-label={`${restaurant.name} - ${restaurant.category} restaurant`}
     >
       {restaurant.photo && (
         <div className="relative w-full h-56 overflow-hidden bg-gradient-to-br from-coral to-plantain">
           <img
-            ref={imageRef}
             src={restaurant.photo}
             alt={`${restaurant.name} exterior or food`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
           {/* Category badge overlay */}
-          <div className="absolute top-4 right-4" ref={badgeRef}>
-            <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm">
+          <div className="absolute top-4 right-4">
+            <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
               {restaurant.category}
             </span>
           </div>
@@ -174,7 +89,7 @@ const RestaurantCard = ({ restaurant, index }) => {
 
       <div className="p-6">
         {/* Restaurant name */}
-        <h2 ref={titleRef} className="text-2xl font-bold text-cafe mb-3 leading-tight">{restaurant.name}</h2>
+        <h2 className="text-2xl font-bold text-cafe mb-3 leading-tight">{restaurant.name}</h2>
 
         {/* Rating and Price */}
         <div className="flex flex-wrap gap-3 mb-4">
@@ -213,7 +128,6 @@ const RestaurantCard = ({ restaurant, index }) => {
         <div className="flex flex-wrap gap-3 pt-2">
           {restaurant.place_id && (
             <a
-              ref={(el) => (buttonRefs.current[0] = el)}
               href={`https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${restaurant.place_id}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -227,7 +141,6 @@ const RestaurantCard = ({ restaurant, index }) => {
 
           {restaurant.website && (
             <a
-              ref={(el) => (buttonRefs.current[1] = el)}
               href={restaurant.website}
               target="_blank"
               rel="noopener noreferrer"

@@ -4,6 +4,7 @@ import https from 'https';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { getCachedData, setCachedData, clearCache } from '../api/cache.js';
 
 // Resolve project root reliably even if the server is started from project root or elsewhere.
 const __filename = fileURLToPath(import.meta.url);
@@ -21,13 +22,28 @@ app.use(express.json());
 
 // API route to fetch restaurants
 app.get('/api/restaurants', async (req, res) => {
+  // Check if manual cache refresh is requested
+  const shouldRefresh = req.query.refresh === 'true';
+  if (shouldRefresh) {
+    console.log('Manual cache refresh requested');
+    clearCache();
+  }
+
+  // Try to get cached data first
+  const cachedData = getCachedData();
+  if (cachedData && !shouldRefresh) {
+    console.log('Returning cached data');
+    return res.json(cachedData);
+  }
+
   // Use server-side env var (private) — set this in Vercel as GOOGLE_PLACES_API_KEY
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   console.log('API Key present:', !!apiKey);
-  
+  console.log('Fetching fresh data from Google Places API...');
+
   if (!apiKey) {
-    return res.status(500).json({ 
-      error: 'Google Places API key not configured' 
+    return res.status(500).json({
+      error: 'Google Places API key not configured'
     });
   }
 
@@ -135,7 +151,13 @@ app.get('/api/restaurants', async (req, res) => {
 
     const restaurants = Array.from(allRestaurants.values());
     console.log(`Found ${restaurants.length} unique restaurants`);
-    res.json({ restaurants });
+
+    const responseData = { restaurants };
+
+    // Cache the data for future requests
+    setCachedData(responseData);
+
+    res.json(responseData);
   } catch (error) {
     console.error('Error details:', error);
     res.status(500).json({ 
