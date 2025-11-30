@@ -1,33 +1,30 @@
-import express from 'express';
-import cors from 'cors';
-import https from 'https';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+// Vercel Serverless function - Full restaurant search with place details
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-// Resolve project root reliably even if the server is started from project root or elsewhere.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootEnvPath = resolve(__dirname, '../.env');
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-// Load root .env for local development
-dotenv.config({ path: rootEnvPath });
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-app.use(cors());
-app.use(express.json());
-
-// API route to fetch restaurants
-app.get('/api/restaurants', async (req, res) => {
-  // Use server-side env var (private) — set this in Vercel as GOOGLE_PLACES_API_KEY
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+
   console.log('API Key present:', !!apiKey);
-  
+  console.log('Environment:', process.env.NODE_ENV || 'development');
+
   if (!apiKey) {
-    return res.status(500).json({ 
-      error: 'Google Places API key not configured' 
+    return res.status(500).json({
+      error: 'Google Places API key not configured on the server'
     });
   }
 
@@ -35,11 +32,11 @@ app.get('/api/restaurants', async (req, res) => {
     const latitude = 42.3601;
     const longitude = -71.0589;
     const radius = 8000;
-    
+
     // Search for different types of Latino restaurants
     const keywords = [
       'mexican restaurant',
-      'colombian restaurant', 
+      'colombian restaurant',
       'puerto rican restaurant',
       'dominican restaurant',
       'peruvian restaurant',
@@ -52,32 +49,17 @@ app.get('/api/restaurants', async (req, res) => {
       'latino restaurant',
       'spanish restaurant'
     ];
-    
+
     let allRestaurants = new Map(); // Use Map to avoid duplicates
-    
-    // Helper function to fetch data
-    const fetchData = (url) => {
-      return new Promise((resolve, reject) => {
-        https.get(url, (resp) => {
-          let data = '';
-          resp.on('data', (chunk) => { data += chunk; });
-          resp.on('end', () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (e) {
-              reject(e);
-            }
-          });
-        }).on('error', reject);
-      });
-    };
-    
+
     // Search with each keyword
     for (const keyword of keywords) {
       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&keyword=${encodeURIComponent(keyword)}&key=${apiKey}`;
-      
+
       console.log(`Searching for: ${keyword}...`);
-      const data = await fetchData(url);
+
+      const searchResponse = await fetch(url);
+      const data = await searchResponse.json();
 
       if (data.status === 'OK' && data.results) {
         // Get place_ids from search results
@@ -89,7 +71,9 @@ app.get('/api/restaurants', async (req, res) => {
             try {
               // Fetch place details
               const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,photos,website,opening_hours,rating,user_ratings_total,geometry,price_level,types&key=${apiKey}`;
-              const detailsData = await fetchData(detailsUrl);
+
+              const detailsResponse = await fetch(detailsUrl);
+              const detailsData = await detailsResponse.json();
 
               if (detailsData.status === 'OK' && detailsData.result) {
                 const place = detailsData.result;
@@ -135,16 +119,13 @@ app.get('/api/restaurants', async (req, res) => {
 
     const restaurants = Array.from(allRestaurants.values());
     console.log(`Found ${restaurants.length} unique restaurants`);
-    res.json({ restaurants });
+
+    res.status(200).json({ restaurants });
   } catch (error) {
     console.error('Error details:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch restaurants', 
-      details: error.message 
+    res.status(500).json({
+      error: 'Failed to fetch restaurants',
+      details: error.message
     });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+}

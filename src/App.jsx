@@ -64,7 +64,11 @@ function App() {
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/restaurants');
+
+      // Determine API base: use VITE_API_BASE_URL if provided for development; otherwise
+      // use relative path so it works when deployed to Vercel (same origin).
+      const apiBase = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
+      const response = await fetch(`${apiBase}/api/restaurants`);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch restaurants');
