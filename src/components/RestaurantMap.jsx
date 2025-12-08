@@ -78,21 +78,69 @@ const RestaurantMap = ({ restaurants, selectedCategory }) => {
                     <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-coral text-white shadow-sm">
                       {restaurant.category}
                     </span>
-                    {restaurant.opening_hours && (
-                      <>
-                        {restaurant.opening_hours.open_now ? (
-                          <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-oceanmint text-cafe shadow-sm flex items-center gap-1">
-                            <FaClock className="text-xs" />
-                            Open Now
-                          </span>
-                        ) : (
-                          <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600 shadow-sm flex items-center gap-1">
-                            <FaClock className="text-xs" />
-                            Closed
-                          </span>
-                        )}
-                      </>
-                    )}
+                    {restaurant.weekday_text && (() => {
+  const now = new Date();
+  const today = now.getDay();
+  const currentTime = now.getHours() * 60 + now.getMinutes();
+  
+  const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const todayName = daysMap[today];
+  const todayHours = restaurant.weekday_text.find(text => text.startsWith(todayName));
+  
+  if (todayHours) {
+    if (todayHours.includes('Closed')) {
+      return (
+        <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600 shadow-sm flex items-center gap-1">
+          <FaClock className="text-xs" />
+          Closed
+        </span>
+      );
+    }
+    
+    const hoursMatch = todayHours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[–-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/);
+    
+    if (hoursMatch) {
+      let [_, openHour, openMin, openPeriod, closeHour, closeMin, closePeriod] = hoursMatch;
+      
+      openHour = parseInt(openHour);
+      closeHour = parseInt(closeHour);
+      openMin = parseInt(openMin);
+      closeMin = parseInt(closeMin);
+      
+      if (openPeriod === 'PM' && openHour !== 12) openHour += 12;
+      if (openPeriod === 'AM' && openHour === 12) openHour = 0;
+      if (closePeriod === 'PM' && closeHour !== 12) closeHour += 12;
+      if (closePeriod === 'AM' && closeHour === 12) closeHour = 0;
+      
+      const openTime = openHour * 60 + openMin;
+      let closeTime = closeHour * 60 + closeMin;
+      
+      if (closeTime < openTime) {
+        closeTime += 24 * 60;
+      }
+      
+      let isOpen;
+      if (closeTime > 24 * 60) {
+        isOpen = currentTime >= openTime || currentTime < (closeTime - 24 * 60);
+      } else {
+        isOpen = currentTime >= openTime && currentTime < closeTime;
+      }
+      
+      return isOpen ? (
+        <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-oceanmint text-cafe shadow-sm flex items-center gap-1">
+          <FaClock className="text-xs" />
+          Open Now
+        </span>
+      ) : (
+        <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600 shadow-sm flex items-center gap-1">
+          <FaClock className="text-xs" />
+          Closed
+        </span>
+      );
+    }
+  }
+  return null;
+})()}
                   </div>
 
                   <p className="text-sm text-gray-700 mb-3 flex items-start gap-2 leading-relaxed">
