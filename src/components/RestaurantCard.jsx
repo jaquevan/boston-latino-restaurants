@@ -3,6 +3,24 @@ import { gsap } from 'gsap';
 import { FaMapMarkerAlt, FaStar, FaDollarSign, FaExternalLinkAlt, FaClock, FaGlobe } from 'react-icons/fa';
 import { MdRestaurant } from 'react-icons/md';
 
+const getCategoryFlag = (category) => {
+  const flagMap = {
+    'Mexican': '/flags/Mexico.png',
+    'Colombian': '/flags/Colombia.png',
+    'Puerto Rican': '/flags/Puerto_Rico.png',
+    'Dominican': '/flags/Dominican_Republic.png',
+    'Peruvian': '/flags/Peru.png',
+    'Cuban': '/flags/Cuba.png',
+    'Venezuelan': '/flags/Venezuela.png',
+    'Salvadoran': '/flags/El_Salvador.png',
+    'Brazilian': '/flags/Brazil.png',
+    'Argentinian': '/flags/Argentina.png',
+    'Spanish': '/flags/Spain.png',
+    'Other': '/flags/Other.png'
+  };
+  return flagMap[category] || '/flags/Other.png';
+};
+
 const RestaurantCard = ({ restaurant, index }) => {
   const cardRef = useRef(null);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -54,38 +72,100 @@ const RestaurantCard = ({ restaurant, index }) => {
       style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)' }}
       aria-label={`${restaurant.name} - ${restaurant.category} restaurant`}
     >
-      {restaurant.photo && (
-        <div className="relative w-full h-56 overflow-hidden bg-gradient-to-br from-coral to-plantain">
-          <img
-            src={restaurant.photo}
-            alt={`${restaurant.name} exterior or food`}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            loading="lazy"
-          />
-          {/* Category badge overlay */}
-          <div className="absolute top-4 right-4">
-            <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
-              {restaurant.category}
+      <div className="relative w-full h-56 overflow-hidden bg-gradient-to-br from-coral to-plantain">
+  <img
+    src={getCategoryFlag(restaurant.category)}
+    alt={`${restaurant.category} flag`}
+    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+    loading="lazy"
+  />
+  {/* Category badge overlay */}
+  <div className="absolute top-4 right-4">
+    <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
+      {restaurant.category}
+    </span>
+  </div>
+  {/* Open/Closed badge */}
+  {restaurant.weekday_text && (
+  <div className="absolute top-4 left-4">
+    {(() => {
+      const now = new Date();
+      const today = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+      
+      const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const todayName = daysMap[today];
+      
+      // Find today's hours
+      const todayHours = restaurant.weekday_text.find(text => text.startsWith(todayName));
+      
+      if (todayHours) {
+        // Check if it says "Closed"
+        if (todayHours.includes('Closed')) {
+          return (
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 text-gray-600 shadow-lg flex items-center gap-1">
+              <FaClock />
+              Closed
             </span>
-          </div>
-          {/* Open/Closed badge */}
-          {restaurant.opening_hours && (
-            <div className="absolute top-4 left-4">
-              {restaurant.opening_hours.open_now ? (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-oceanmint text-cafe shadow-lg flex items-center gap-1">
-                  <FaClock />
-                  Open Now
-                </span>
-              ) : (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 text-gray-600 shadow-lg flex items-center gap-1">
-                  <FaClock />
-                  Closed
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+          );
+        }
+        
+        // Parse hours - handle both – (en-dash) and - (hyphen)
+        const hoursMatch = todayHours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*[–-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/);
+        
+        if (hoursMatch) {
+          let [_, openHour, openMin, openPeriod, closeHour, closeMin, closePeriod] = hoursMatch;
+          
+          // Convert to 24-hour format
+          openHour = parseInt(openHour);
+          closeHour = parseInt(closeHour);
+          openMin = parseInt(openMin);
+          closeMin = parseInt(closeMin);
+          
+          if (openPeriod === 'PM' && openHour !== 12) openHour += 12;
+          if (openPeriod === 'AM' && openHour === 12) openHour = 0;
+          if (closePeriod === 'PM' && closeHour !== 12) closeHour += 12;
+          if (closePeriod === 'AM' && closeHour === 12) closeHour = 0;
+          
+          const openTime = openHour * 60 + openMin;
+          let closeTime = closeHour * 60 + closeMin;
+          
+          // Handle places that close after midnight (e.g., 3:00 AM)
+          // If close time is earlier than open time, it means next day
+          if (closeTime < openTime) {
+            closeTime += 24 * 60; // Add 24 hours
+          }
+          
+          // Check if currently open
+          let isOpen;
+          if (closeTime > 24 * 60) {
+            // Place closes after midnight
+            isOpen = currentTime >= openTime || currentTime < (closeTime - 24 * 60);
+          } else {
+            // Normal hours (same day)
+            isOpen = currentTime >= openTime && currentTime < closeTime;
+          }
+          
+          return isOpen ? (
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-oceanmint text-cafe shadow-lg flex items-center gap-1">
+              <FaClock />
+              Abierto ahora
+            </span>
+          ) : (
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 text-gray-600 shadow-lg flex items-center gap-1">
+              <FaClock />
+              Cerrado ahora
+            </span>
+          );
+        }
+      }
+      
+      // Fallback if no hours available
+      return null;
+    })()}
+  </div>
+)}
+</div>
 
       <div className="p-6">
         {/* Restaurant name */}
@@ -120,7 +200,7 @@ const RestaurantCard = ({ restaurant, index }) => {
         {restaurant.distance && (
           <div className="text-sm font-semibold text-cariblue mb-4 flex items-center gap-2 bg-cariblue/5 rounded-xl px-4 py-3 border-2 border-cariblue/20">
             <FaMapMarkerAlt className="text-base" />
-            <span>{restaurant.distance.toFixed(1)} miles from BU</span>
+            <span>{restaurant.distance.toFixed(1)} millas de BU</span>
           </div>
         )}
 
@@ -135,7 +215,7 @@ const RestaurantCard = ({ restaurant, index }) => {
               aria-label={`View ${restaurant.name} on Google Maps`}
             >
               <FaMapMarkerAlt aria-hidden="true" />
-              <span>View on Maps</span>
+              <span>Ver en mapas</span>
             </a>
           )}
 
@@ -148,7 +228,7 @@ const RestaurantCard = ({ restaurant, index }) => {
               aria-label={`Visit ${restaurant.name} website`}
             >
               <FaGlobe aria-hidden="true" />
-              <span>Website</span>
+              <span>Sitio web</span>
             </a>
           )}
         </div>

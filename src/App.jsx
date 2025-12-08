@@ -258,7 +258,7 @@ function App() {
               className="text-2xl md:text-4xl text-white mb-3 max-w-4xl mx-auto font-bold leading-relaxed"
               style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.3)' }}
             >
-              Local Latino Restaurants
+              Restaurantes latinos locales
             </p>
 
             {/* Colorful Stats cards with animation refs */}
@@ -274,7 +274,7 @@ function App() {
                 ) : (
                   <div className="text-4xl font-black text-white mb-1 drop-shadow-md">{restaurants.length}+</div>
                 )}
-                <div className="text-base text-white font-semibold drop-shadow-sm">Restaurants</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Restaurantes</div>
               </div>
 
               <div
@@ -284,7 +284,7 @@ function App() {
               >
                 <FaMapMarkerAlt className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
                 <div className="text-4xl font-black text-white mb-1 drop-shadow-md">5mi</div>
-                <div className="text-base text-white font-semibold drop-shadow-sm">Radius</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Radio</div>
               </div>
 
               <div
@@ -294,7 +294,7 @@ function App() {
               >
                 <FaUtensils className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
                 <div className="text-4xl font-black text-white mb-1 drop-shadow-md">13</div>
-                <div className="text-base text-white font-semibold drop-shadow-sm">Cuisines</div>
+                <div className="text-base text-white font-semibold drop-shadow-sm">Cocinas</div>
               </div>
             </div>
           </div>
@@ -317,7 +317,7 @@ function App() {
               <div className="bg-white rounded-2xl p-6 sticky top-4" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-cafe">
                   <FaFilter className="text-coral text-lg" />
-                  Filter by Cuisine
+                  Filtrar por Cocina
                 </h3>
                 <div className="flex flex-col gap-2">
                   {categories.map(category => (
@@ -350,7 +350,7 @@ function App() {
                 >
                   <div className="flex items-center gap-2">
                     <FaMapMarkerAlt className="text-coral text-xl" aria-hidden="true" />
-                    <span>Restaurant Locations</span>
+                    <span>Ubicaciones de restaurantes</span>
                   </div>
                   {isMapExpanded ? (
                     <FaChevronUp className="text-lg text-gray-500" aria-hidden="true" />
@@ -364,7 +364,7 @@ function App() {
                     <div className="h-[500px] w-full rounded-2xl bg-white flex items-center justify-center" style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)' }}>
                       <div className="text-center">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cariblue border-t-transparent mb-4"></div>
-                        <p className="text-cafe font-medium">Loading map...</p>
+                        <p className="text-cafe font-medium">Cargando mapa...</p>
                       </div>
                     </div>
                   }>
@@ -393,7 +393,7 @@ function App() {
           >
             <div className={`${isSortSticky ? 'max-w-7xl mx-auto px-4 py-3' : 'p-4'}`}>
               <div className="flex items-center gap-3 flex-wrap justify-center">
-                <span className="text-sm font-bold text-cafe">Sort by:</span>
+                <span className="text-sm font-bold text-cafe">Ordenar por:</span>
                 <button
                   onClick={() => setSortBy('default')}
                   className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
@@ -412,7 +412,7 @@ function App() {
                       : 'bg-coco text-cafe hover:bg-gray-100'
                   }`}
                 >
-                  <FaMapMarkerAlt /> Distance
+                  <FaMapMarkerAlt /> Distancia
                 </button>
                 <button
                   onClick={() => setSortBy('rating')}
@@ -422,7 +422,7 @@ function App() {
                       : 'bg-coco text-cafe hover:bg-gray-100'
                   }`}
                 >
-                  <FaStar /> Rating
+                  <FaStar /> Clasificación
                 </button>
                 <button
                   onClick={() => setSortBy('alphabetical')}
@@ -437,7 +437,7 @@ function App() {
                 {locationPermission === 'granted' && (
                   <span className="text-xs text-green-600 font-medium px-3 py-1.5 bg-green-50 rounded-full flex items-center gap-1">
                     <FaMapMarkerAlt className="text-xs" />
-                    Using your location
+                    Usando tu ubicación
                   </span>
                 )}
               </div>
@@ -450,7 +450,7 @@ function App() {
             <div className="bg-white rounded-2xl p-4 mb-6 text-center" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
               <div className="flex items-center justify-center gap-3">
                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-4 border-cariblue border-t-transparent"></div>
-                <p className="text-lg text-cafe font-medium">Loading restaurants...</p>
+                <p className="text-lg text-cafe font-medium">Cargando restaurantes...</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -480,12 +480,12 @@ function App() {
           <>
             <h2 className="text-2xl font-bold text-cafe mb-6 flex items-center gap-2">
               <MdRestaurant className="text-cariblue text-3xl" />
-              All Restaurants ({filteredRestaurants.length})
+              Todos los restaurantes ({filteredRestaurants.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRestaurants.length === 0 ? (
                 <div className="col-span-full text-center py-12 bg-white rounded-2xl" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)' }}>
-                  <p className="text-lg text-terracotta">No restaurants found in this category.</p>
+                  <p className="text-lg text-terracotta">No se encontraron restaurantes en esta categoría.</p>
                 </div>
               ) : (
                 filteredRestaurants.map((restaurant, index) => (
