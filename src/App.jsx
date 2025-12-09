@@ -29,6 +29,23 @@ function App() {
 
   const categories = ['all', 'Mexican', 'Colombian', 'Puerto Rican', 'Dominican', 'Peruvian', 'Cuban', 'Venezuelan', 'Salvadoran', 'Brazilian', 'Argentinian', 'Spanish', 'Other'];
 
+  // Translation map for categories
+  const categoryTranslations = {
+    'all': 'Todos',
+    'Mexican': 'Mexicana',
+    'Colombian': 'Colombiana',
+    'Puerto Rican': 'Puertorriqueña',
+    'Dominican': 'Dominicana',
+    'Peruvian': 'Peruana',
+    'Cuban': 'Cubana',
+    'Venezuelan': 'Venezolana',
+    'Salvadoran': 'Salvadoreña',
+    'Brazilian': 'Brasileña',
+    'Argentinian': 'Argentina',
+    'Spanish': 'Española',
+    'Other': 'Otra'
+  };
+
   // Default location: Boston University
   const BU_LAT = 42.3505;
   const BU_LON = -71.1054;
@@ -38,33 +55,41 @@ function App() {
     requestUserLocation();
   }, []);
 
-  // GSAP Hero Animations
+  // GSAP Hero Animations - only on desktop for better mobile performance
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    // Check if device is mobile
+    const isMobile = window.innerWidth <= 768;
 
-    tl.fromTo(
-      heroIconRef.current,
-      { opacity: 0, scale: 0, rotation: -180 },
-      { opacity: 1, scale: 1, rotation: 0, duration: 1, ease: 'back.out(1.7)' }
-    )
-    .fromTo(
-      heroTitleRef.current,
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      '-=0.5'
-    )
-    .fromTo(
-      heroSubtitleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      '-=0.4'
-    )
-    .fromTo(
-      heroStatsRef.current,
-      { opacity: 0, y: 40, scale: 0.8 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.15 },
-      '-=0.4'
-    );
+    if (!isMobile) {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      tl.fromTo(
+        heroIconRef.current,
+        { opacity: 0, scale: 0, rotation: -180 },
+        { opacity: 1, scale: 1, rotation: 0, duration: 1, ease: 'back.out(1.7)' }
+      )
+      .fromTo(
+        heroTitleRef.current,
+        { opacity: 0, y: -50 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        '-=0.5'
+      )
+      .fromTo(
+        heroSubtitleRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        '-=0.4'
+      )
+      .fromTo(
+        heroStatsRef.current,
+        { opacity: 0, y: 40, scale: 0.8 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.15 },
+        '-=0.4'
+      );
+    } else {
+      // Simple fade-in for mobile
+      gsap.set([heroIconRef.current, heroTitleRef.current, heroSubtitleRef.current, ...heroStatsRef.current], { opacity: 1 });
+    }
   }, []);
 
   // Request user's geolocation
@@ -225,7 +250,7 @@ function App() {
   return (
     <div className="min-h-screen bg-coco" data-theme="latino">
       {/* Hero Section - Enhanced with vibrant colors */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-coral via-[#FF6B9D] via-[#FFA07A] to-plantain h-screen max-h-[85vh] flex items-center">
+      <header className="relative overflow-hidden bg-gradient-to-br from-coral via-[#FF6B9D] via-[#FFA07A] to-plantain min-h-[60vh] md:min-h-[70vh] lg:h-screen lg:max-h-[85vh] flex items-center">
         {/* Colorful floating bubbles with less opacity */}
         <div className="floating-bubble bubble-blue"></div>
         <div className="floating-bubble bubble-yellow"></div>
@@ -234,19 +259,19 @@ function App() {
         <div className="floating-bubble bubble-lime"></div>
         <div className="floating-bubble bubble-teal"></div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
           <div className="text-center">
             {/* Icon with animation ref */}
-            <div ref={heroIconRef} className="mb-6">
-              <div className="inline-block p-4 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-md rounded-full shadow-2xl border-2 border-white/30">
-                <GiTacos className="text-7xl md:text-8xl text-white drop-shadow-lg" aria-hidden="true" />
+            <div ref={heroIconRef} className="mb-4 md:mb-6">
+              <div className="inline-block p-3 md:p-4 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-md rounded-full shadow-2xl border-2 border-white/30">
+                <GiTacos className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white drop-shadow-lg" aria-hidden="true" />
               </div>
             </div>
 
             {/* Title with animation ref */}
             <h1
               ref={heroTitleRef}
-              className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-3 md:mb-4 tracking-tighter px-2"
               style={{ textShadow: '4px 4px 20px rgba(0,0,0,0.3)' }}
             >
               Sabor Latino Boston
@@ -255,46 +280,46 @@ function App() {
             {/* Enhanced Subtitle with animation ref */}
             <p
               ref={heroSubtitleRef}
-              className="text-2xl md:text-4xl text-white mb-3 max-w-4xl mx-auto font-bold leading-relaxed"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-white mb-4 md:mb-3 max-w-4xl mx-auto font-bold leading-relaxed px-4"
               style={{ textShadow: '2px 2px 10px rgba(0,0,0,0.3)' }}
             >
               Restaurantes latinos locales
             </p>
 
             {/* Colorful Stats cards with animation refs */}
-            <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto" role="list">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 max-w-5xl mx-auto px-2" role="list">
               <div
                 ref={(el) => (heroStatsRef.current[0] = el)}
-                className="group bg-gradient-to-br from-[#4ECDC4]/20 to-[#44A08D]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#4ECDC4]"
+                className="group bg-gradient-to-br from-[#4ECDC4]/20 to-[#44A08D]/20 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[110px] sm:min-w-[140px] md:min-w-[160px] border-2 border-white/40 hover:border-[#4ECDC4]"
                 role="listitem"
               >
-                <MdRestaurant className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
+                <MdRestaurant className="text-white text-2xl sm:text-3xl md:text-4xl mx-auto mb-2 md:mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
                 {loading ? (
-                  <div className="text-4xl font-black text-white mb-1 animate-pulse">...</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 animate-pulse">...</div>
                 ) : (
-                  <div className="text-4xl font-black text-white mb-1 drop-shadow-md">{restaurants.length}+</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-md">{restaurants.length}+</div>
                 )}
-                <div className="text-base text-white font-semibold drop-shadow-sm">Restaurantes</div>
+                <div className="text-xs sm:text-sm md:text-base text-white font-semibold drop-shadow-sm">Restaurantes</div>
               </div>
 
               <div
                 ref={(el) => (heroStatsRef.current[1] = el)}
-                className="group bg-gradient-to-br from-[#FFD93D]/20 to-[#F9CA24]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#FFD93D]"
+                className="group bg-gradient-to-br from-[#FFD93D]/20 to-[#F9CA24]/20 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[110px] sm:min-w-[140px] md:min-w-[160px] border-2 border-white/40 hover:border-[#FFD93D]"
                 role="listitem"
               >
-                <FaMapMarkerAlt className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
-                <div className="text-4xl font-black text-white mb-1 drop-shadow-md">5mi</div>
-                <div className="text-base text-white font-semibold drop-shadow-sm">Radio</div>
+                <FaMapMarkerAlt className="text-white text-2xl sm:text-3xl md:text-4xl mx-auto mb-2 md:mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-md">5mi</div>
+                <div className="text-xs sm:text-sm md:text-base text-white font-semibold drop-shadow-sm">Radio</div>
               </div>
 
               <div
                 ref={(el) => (heroStatsRef.current[2] = el)}
-                className="group bg-gradient-to-br from-[#A8E6CF]/20 to-[#81C784]/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[160px] border-2 border-white/40 hover:border-[#A8E6CF]"
+                className="group bg-gradient-to-br from-[#A8E6CF]/20 to-[#81C784]/20 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl hover:scale-105 transition-all duration-300 min-w-[110px] sm:min-w-[140px] md:min-w-[160px] border-2 border-white/40 hover:border-[#A8E6CF]"
                 role="listitem"
               >
-                <FaUtensils className="text-white text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
-                <div className="text-4xl font-black text-white mb-1 drop-shadow-md">13</div>
-                <div className="text-base text-white font-semibold drop-shadow-sm">Cocinas</div>
+                <FaUtensils className="text-white text-2xl sm:text-3xl md:text-4xl mx-auto mb-2 md:mb-3 group-hover:scale-110 transition-transform drop-shadow-lg" aria-hidden="true" />
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-md">13</div>
+                <div className="text-xs sm:text-sm md:text-base text-white font-semibold drop-shadow-sm">Cocinas</div>
               </div>
             </div>
           </div>
@@ -302,7 +327,7 @@ function App() {
 
         {/* Decorative wave divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-12 sm:h-16 md:h-auto">
             <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F7F7F7"/>
           </svg>
         </div>
@@ -330,7 +355,7 @@ function App() {
                           : 'bg-coco text-cafe hover:bg-gray-100'
                       }`}
                     >
-                      {category} ({getCategoryCount(category)})
+                      {categoryTranslations[category]} ({getCategoryCount(category)})
                     </button>
                   ))}
                 </div>
@@ -386,58 +411,64 @@ function App() {
             ref={sortBarRef}
             className={`transition-all duration-300 ${
               isSortSticky
-                ? 'fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg'
+                ? 'fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-white via-white to-white shadow-xl border-b-2 border-coral/20'
                 : 'bg-white rounded-2xl mb-6'
             }`}
             style={!isSortSticky ? { boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' } : {}}
           >
-            <div className={`${isSortSticky ? 'max-w-7xl mx-auto px-4 py-3' : 'p-4'}`}>
-              <div className="flex items-center gap-3 flex-wrap justify-center">
-                <span className="text-sm font-bold text-cafe">Ordenar por:</span>
+            <div className={`${isSortSticky ? 'max-w-7xl mx-auto px-3 py-3 md:px-4 md:py-3' : 'p-4 md:p-5'}`}>
+              <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center">
+                <span className="text-xs md:text-sm font-bold text-cafe hidden md:inline-block">Ordenar por:</span>
                 <button
                   onClick={() => setSortBy('default')}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  className={`px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all ${
                     sortBy === 'default'
-                      ? 'bg-cariblue text-white shadow-md'
-                      : 'bg-coco text-cafe hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-cariblue to-[#2E86AB] text-white shadow-lg scale-105'
+                      : 'bg-coco text-cafe hover:bg-gray-100 active:scale-95'
                   }`}
                 >
-                  Default
+                  <span className="hidden sm:inline">Predeterminado</span>
+                  <span className="sm:hidden">Pred.</span>
                 </button>
                 <button
                   onClick={() => setSortBy('distance')}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
+                  className={`px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all flex items-center gap-1.5 ${
                     sortBy === 'distance'
-                      ? 'bg-cariblue text-white shadow-md'
-                      : 'bg-coco text-cafe hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-cariblue to-[#2E86AB] text-white shadow-lg scale-105'
+                      : 'bg-coco text-cafe hover:bg-gray-100 active:scale-95'
                   }`}
                 >
-                  <FaMapMarkerAlt /> Distancia
+                  <FaMapMarkerAlt className="text-xs" />
+                  <span className="hidden sm:inline">Distancia</span>
+                  <span className="sm:hidden">Dist.</span>
                 </button>
                 <button
                   onClick={() => setSortBy('rating')}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 ${
+                  className={`px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all flex items-center gap-1.5 ${
                     sortBy === 'rating'
-                      ? 'bg-cariblue text-white shadow-md'
-                      : 'bg-coco text-cafe hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-cariblue to-[#2E86AB] text-white shadow-lg scale-105'
+                      : 'bg-coco text-cafe hover:bg-gray-100 active:scale-95'
                   }`}
                 >
-                  <FaStar /> Clasificación
+                  <FaStar className="text-xs" />
+                  <span className="hidden sm:inline">Clasificación</span>
+                  <span className="sm:hidden">Rating</span>
                 </button>
                 <button
                   onClick={() => setSortBy('alphabetical')}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  className={`px-3 py-2 md:px-4 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all ${
                     sortBy === 'alphabetical'
-                      ? 'bg-cariblue text-white shadow-md'
-                      : 'bg-coco text-cafe hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-cariblue to-[#2E86AB] text-white shadow-lg scale-105'
+                      : 'bg-coco text-cafe hover:bg-gray-100 active:scale-95'
                   }`}
                 >
                   A-Z
                 </button>
                 {locationPermission === 'granted' && (
-                  <span className="text-xs text-green-600 font-medium px-3 py-1.5 bg-green-50 rounded-full flex items-center gap-1">
+                  <span className="text-xs text-green-600 font-medium px-2.5 py-1.5 md:px-3 md:py-2 bg-green-50 border border-green-200 rounded-full flex items-center gap-1.5 shadow-sm">
                     <FaMapMarkerAlt className="text-xs" />
-                    Usando tu ubicación
+                    <span className="hidden md:inline">Usando tu ubicación</span>
+                    <span className="md:hidden">Activo</span>
                   </span>
                 )}
               </div>
