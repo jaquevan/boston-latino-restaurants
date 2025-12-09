@@ -26,7 +26,18 @@ const RestaurantCard = ({ restaurant, index }) => {
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    // Create intersection observer to only animate when card is visible
+    // Disable animations on mobile for better performance
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // On mobile, just show the card immediately
+      if (cardRef.current) {
+        gsap.set(cardRef.current, { opacity: 1, y: 0 });
+      }
+      return;
+    }
+
+    // Create intersection observer to only animate when card is visible (desktop only)
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -68,7 +79,7 @@ const RestaurantCard = ({ restaurant, index }) => {
   return (
     <article
       ref={cardRef}
-      className="bg-white rounded-3xl overflow-hidden group transition-all duration-300 hover:-translate-y-3 hover:scale-[1.02] opacity-0"
+      className="bg-white rounded-3xl overflow-hidden group md:transition-all md:duration-300 md:hover:-translate-y-3 md:hover:scale-[1.02] opacity-0"
       style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)' }}
       aria-label={`${restaurant.name} - ${restaurant.category} restaurant`}
     >
@@ -76,12 +87,12 @@ const RestaurantCard = ({ restaurant, index }) => {
   <img
     src={getCategoryFlag(restaurant.category)}
     alt={`${restaurant.category} flag`}
-    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+    className="w-full h-full object-cover md:transition-transform md:duration-500 md:group-hover:scale-110"
     loading="lazy"
   />
   {/* Category badge overlay */}
   <div className="absolute top-4 right-4">
-    <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
+    <span className="px-4 py-2 rounded-full text-xs font-bold bg-coral text-white shadow-lg backdrop-blur-sm md:transition-transform md:duration-300 md:group-hover:scale-105">
       {restaurant.category}
     </span>
   </div>
